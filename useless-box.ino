@@ -51,6 +51,7 @@ DNSServer dnsServer;
 
 bool isWifiConfigured = false;
 
+void redirectToRoot();
 void initSerial();
 void initServos();
 void initLed();
@@ -189,10 +190,21 @@ void setup() {
   server.on("/playSound", HTTP_GET, handlePlaySound);
   server.on("/setSound", HTTP_GET, handleSetSound);
   server.on("/bootstrap.css", HTTP_GET, []() { server.send_P(200, "text/css", bootstrap_min_css); });
+  server.on("/generate_204", HTTP_GET, []() { redirectToRoot(); });  // Android
+  server.on("/hotspot-detect.html", HTTP_GET, []() { redirectToRoot(); }); // iOS
+  server.on("/connecttest.txt", HTTP_GET, []() { redirectToRoot(); }); // Windows
+  server.onNotFound([]() {
+    redirectToRoot();
+  });
 
   // Start the server
   server.begin();
   Serial.println("Web Server Started");
+}
+
+void redirectToRoot() {
+  server.sendHeader("Location", String("http://") + WiFi.softAPIP().toString(), true);
+  server.send(302, "text/plain", "");
 }
 
 void initSerial() {
