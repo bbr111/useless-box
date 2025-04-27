@@ -1,10 +1,10 @@
 #include "speed-servo.h"
 
-const int SLOW_MOVE_DELAY = 15;
-const int Fast_MOVE_DELAY = 2;
+const int SLOW_MOVE_DELAY = 2;
+const int FAST_MOVE_DELAY = 15;
 
 void SpeedServo::attach(uint8_t pin) {
-  _servo.attach(pin);
+  _servo.attach(pin, 500, 2400);
 }
 
 // Valid position: 0-180.
@@ -15,7 +15,7 @@ void SpeedServo::moveNowTo(int newPosition) {
 
 // Valid position: 0-180.
 void SpeedServo::moveFastTo(int newPosition) {
-  _moveTo(newPosition, Fast_MOVE_DELAY);
+  _moveTo(newPosition, FAST_MOVE_DELAY);
 }
 
 // Valid position: 0-180.
@@ -25,17 +25,17 @@ void SpeedServo::moveSlowTo(int newPosition) {
 
 // Valid position: 0-180.
 void SpeedServo::_moveTo(int newPosition, unsigned long stepDelay) {
-  if(newPosition > _lastPosition) {
-    for (int pos = _lastPosition; pos <= newPosition; pos++) {
+  int stepSize = stepDelay;
+  if (newPosition > _lastPosition) {
+    for (int pos = _lastPosition; pos <= newPosition; pos += stepSize) {
       _servo.write(pos);
-      delay(stepDelay);
+      //delay(stepDelay);
     }
   } else {
-    for (int pos = _lastPosition; pos >= newPosition; pos--) {
+    for (int pos = _lastPosition; pos >= newPosition; pos -= stepSize) {
       _servo.write(pos);
-      delay(stepDelay);
+      //delay(stepDelay);
     }
   }
-
   _lastPosition = newPosition;
 }
