@@ -25,6 +25,8 @@ bool isSoundEnabled = true;
 #include "config.h"  // To store configuration and secrets.
 #include "beeperfx.h"
 
+#include "bootstrap_min_css.h"
+
 SpeedServo lidServo;
 SpeedServo switchServo;
 StatusLed led;
@@ -49,6 +51,11 @@ DNSServer dnsServer;
 
 bool isWifiConfigured = false;
 
+void initSerial();
+void initServos();
+void initLed();
+void initSensor();
+void handleRoot();
 void handleSetWifi();
 void handleProximity();
 void handleSetServo();
@@ -56,6 +63,9 @@ void handleResetServo();
 void handleConfigPage();
 void handleWifiStatus();
 void handleStatus();
+void handleResetWifi();
+void handlePlaySound();
+void handleSetSound();
 void run();
 void runSlow();
 void runWaitThenFast();
@@ -73,8 +83,6 @@ void closeLidFast();
 void clapLid();
 void flipSwitchSlow();
 void flipSwitchFast();
-void handlePlaySound();
-void handleSetSound();
 
 void saveWifiConfig(const WifiConfig& config) {
   EEPROM.begin(EEPROM_SIZE);
@@ -180,6 +188,7 @@ void setup() {
   server.on("/resetWifi", HTTP_POST, handleResetWifi);
   server.on("/playSound", HTTP_GET, handlePlaySound);
   server.on("/setSound", HTTP_GET, handleSetSound);
+  server.on("/bootstrap.css", HTTP_GET, []() { server.send_P(200, "text/css", bootstrap_min_css); });
 
   // Start the server
   server.begin();
@@ -340,7 +349,7 @@ void handleRoot() {
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>JontesBox</title>
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+      <link href="/bootstrap.css" rel="stylesheet">
     </head>
     <body class="bg-light">
       <div class="container py-4">
